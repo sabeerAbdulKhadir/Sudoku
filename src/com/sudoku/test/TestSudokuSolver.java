@@ -1,6 +1,8 @@
-package com.sudoku;
+package com.sudoku.test;
 
 import java.io.FileNotFoundException;
+
+import com.sudoku.Sudoku;
 
 public class TestSudokuSolver {
 
