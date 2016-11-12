@@ -7,25 +7,35 @@ import java.io.IOException;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
+import com.sudoku.components.Cell;
+import com.sudoku.components.Grid;
+import com.sudoku.constants.SudokuConstants;
 import com.sudoku.exception.SudokuFileException;
 
 public class SudokuReaderWriter implements FileReaderWriter {
 
+	private String deLimiter;
+	private String emptyCellValue;
+
+	public SudokuReaderWriter(String fileDelimiter, String emptyCellValue) {
+		deLimiter = fileDelimiter;
+		this.emptyCellValue = emptyCellValue;
+	}
+
 	/**
-	 * {@inheritDoc}.
+	 * {@inheritDoc}
 	 */
-	public String[][] readFile(File file) {
+	public Grid readFileToGrid(String filePath) throws SudokuFileException {
+
+		File file = new File(filePath);
 		/**
 		 * Use 9x9 array to hold the sudoku board.
 		 */
-		String[][] grid = new String[9][9];
-		Scanner scanner;
+		Grid grid = new Grid(9, 9);
+
+		Scanner scanner = null;
 		try {
 			scanner = new Scanner(file);
-		} catch (FileNotFoundException e) {
-			throw new SudokuFileException("Error reading message from file '" + file.getAbsolutePath() + "'.", e);
-		}
-		try {
 			int row = 0;
 			while (scanner.hasNext()) {
 				int column = 0;
@@ -34,12 +44,13 @@ public class SudokuReaderWriter implements FileReaderWriter {
 				/**
 				 * to read values separated by pipe delimiter.
 				 */
-				StringTokenizer st = new StringTokenizer(line, PIPE_DELIMITER);
+				StringTokenizer st = new StringTokenizer(line, deLimiter);
 				while (st.hasMoreTokens()) {
 					String token = st.nextToken();
-					if (token.trim().matches(NUMBER_PATTERN) || ".".equals(token.trim())) {
-						if (row < 9 && column < 9) {
-							grid[row][column] = token;
+					if (emptyCellValue.equals(token) || token.trim().matches(SudokuConstants.NUMBER_PATTERN)) {
+						if (row < grid.getNumberOfRows() && column < grid.getNumberOfColumns()) {
+							Cell cell = new Cell(token, emptyCellValue);
+							grid.getGrid()[row][column] = cell;
 							column++;
 						}
 					} else {
@@ -49,33 +60,33 @@ public class SudokuReaderWriter implements FileReaderWriter {
 				}
 				row++;
 			}
+
+		} catch (FileNotFoundException e) {
+			throw new SudokuFileException("Error reading message from file '" + file.getAbsolutePath() + "'.", e);
 		} finally {
 			scanner.close();
 		}
 
 		return grid;
+
 	}
 
 	/**
-	 * {@inheritDoc}.
+	 * {@inheritDoc}
 	 */
-	public void writeFile(String[][] grid, String outputPath) {
-
-		if (!outputPath.endsWith(EXTENSION_TXT)) {
-			throw new SudokuFileException("Output file name is not a valid text file.");
-		}
+	public void writeFileFromGrid(Grid grid, String outputPath) {
 
 		StringBuilder builder = new StringBuilder();
-		for (int i = 0; i < grid.length; i++) {
-			builder.append(PIPE_DELIMITER);
-			for (int j = 0; j < grid.length; j++) {
-				builder.append(grid[i][j]).append(PIPE_DELIMITER);
+		for (int i = 0; i < grid.getGrid().length; i++) {
+			builder.append(deLimiter);
+			for (int j = 0; j < grid.getGrid().length; j++) {
+				builder.append(grid.getCellValue(i, j)).append(deLimiter);
 			}
-			builder.append(NEW_LINE);
+			builder.append(SudokuConstants.NEW_LINE);
 		}
 
 		String gridContent = builder.toString();
-		if (gridContent.contains(".")) {
+		if (gridContent.contains(emptyCellValue)) {
 			builder.insert(0, "The grid is invalid and cannot be solved.\n");
 			gridContent = builder.toString();
 		}
@@ -85,9 +96,12 @@ public class SudokuReaderWriter implements FileReaderWriter {
 		} catch (IOException e) {
 			throw new SudokuFileException("Unable to write output to the file '" + outputPath + "'. \nERROR:", e);
 		}
+
 	}
 
-	@Override
+	/**
+	 * {@inheritDoc}
+	 */
 	public void writeExceptionFile(String message, String outputPath, String inputPath) {
 
 		try {
@@ -119,7 +133,7 @@ public class SudokuReaderWriter implements FileReaderWriter {
 				throw e;
 			}
 			String outputDir = new File(inputPath).getParentFile().getAbsolutePath();
-			outputDir += "\\" + DEFAULT_OUTPUT_FILENAME;
+			outputDir += "\\" + SudokuConstants.DEFAULT_OUTPUT_FILENAME;
 			fileWriter = new FileWriter(outputDir);
 			fileWriter.write(content);
 		} finally {

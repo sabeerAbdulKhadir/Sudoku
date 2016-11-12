@@ -1,22 +1,28 @@
+
 package com.sudoku;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.util.Date;
 
+import com.sudoku.components.Grid;
 import com.sudoku.exception.SudokuFileException;
 import com.sudoku.fileio.FileReaderWriter;
 import com.sudoku.fileio.SudokuReaderWriter;
+import com.sudoku.solver.SudokuSolver;
 
 public class Sudoku {
 
-	private static String outputFilePath = "";
+	private String outputFilePath = "";
 
-	private static String inputFilePath = "";
+	private String inputFilePath = "";
+
+	private String emptyCellValue = "";
+
+	private String delimiter = "";
 
 	/**
-	 * 2D array to hold the elements.
+	 * 2D representation to hold the elements.
 	 */
-	private String[][] grid;
+	private Grid grid;
 
 	/**
 	 * Reader to read input from file.
@@ -31,18 +37,21 @@ public class Sudoku {
 	/**
 	 * Initializes the class by reading the input file.
 	 * 
-	 * @param inputFilePath
+	 * @param inFilePath
 	 *            path of the inputFile.
-	 * @param outputFilePath
+	 * @param outFilePath
 	 *            path of the outputFile.
-	 * @throws FileNotFoundException
-	 *             Throws FileNotFoundException if the file cannot be located on
-	 *             the location.
+	 * @param delimiter
+	 *            delimiter of the input file(which will be used in output file
+	 *            as well).
+	 * @param emptyCellValue
+	 *            value used to represent empty cells in the input file.
+	 * 
 	 */
-	public Sudoku(String inputFilePath, String outputFilePath) {
-		setOutputFilePath(outputFilePath);
-		setInputFilePath(inputFilePath);
-		readerWriter = new SudokuReaderWriter();
+	public Sudoku(String inFilePath, String outFilePath, String delimiter, String emptyCellValue) {
+		outputFilePath = outFilePath;
+		inputFilePath = inFilePath;
+		readerWriter = new SudokuReaderWriter(delimiter, emptyCellValue);
 		solver = new SudokuSolver();
 	}
 
@@ -51,20 +60,30 @@ public class Sudoku {
 	 */
 	public void solvePuzzle() {
 		try {
-			File inputFile = new File(getInputFilePath());
-			String[][] grid = readerWriter.readFile(inputFile);
-			setGrid(grid);
+
+			grid = readerWriter.readFileToGrid(inputFilePath);
 			solver.solveGrid(grid);
-			readerWriter.writeFile(grid, getOutputFilePath());
+			readerWriter.writeFileFromGrid(grid, getOutputFilePath());
+
 		} catch (SudokuFileException e) {
-			String error = e.getMessage();
-			Throwable cause = e.getCause();
-			if (cause != null) {
-				error += "\n" + e.getCause().getMessage();
-			}
-			readerWriter.writeExceptionFile(error, getOutputFilePath(), getInputFilePath());
+			String errorMessage = getFormattedExceptionMessage(e);
+			readerWriter.writeExceptionFile(errorMessage, getOutputFilePath(), getInputFilePath());
 			e.printStackTrace();
 		}
+	}
+
+	/**
+	 * Creates a message from the exception and returns to the caller.
+	 * 
+	 * @return exception message.
+	 */
+	private String getFormattedExceptionMessage(SudokuFileException e) {
+		String error = new Date() + ":  " + e.getMessage();
+		Throwable cause = e.getCause();
+		if (cause != null) {
+			error += "Caused by: " + e.getCause().getMessage();
+		}
+		return error;
 	}
 
 	/**
@@ -72,7 +91,7 @@ public class Sudoku {
 	 * 
 	 * @return the grid
 	 */
-	public String[][] getGrid() {
+	public Grid getGrid() {
 		return grid;
 	}
 
@@ -82,7 +101,7 @@ public class Sudoku {
 	 * @param grid
 	 *            the grid to set
 	 */
-	public void setGrid(String[][] grid) {
+	public void setGrid(Grid grid) {
 		this.grid = grid;
 	}
 
@@ -91,8 +110,8 @@ public class Sudoku {
 	 * 
 	 * @return the outputFilePath
 	 */
-	public static String getOutputFilePath() {
-		return outputFilePath;
+	public String getOutputFilePath() {
+		return this.outputFilePath;
 	}
 
 	/**
@@ -101,8 +120,8 @@ public class Sudoku {
 	 * @param outputFilePath
 	 *            the outputFilePath to set
 	 */
-	public static void setOutputFilePath(String outputFilePath) {
-		Sudoku.outputFilePath = outputFilePath;
+	public void setOutputFilePath(String outputFilePath) {
+		this.outputFilePath = outputFilePath;
 	}
 
 	/**
@@ -110,7 +129,7 @@ public class Sudoku {
 	 * 
 	 * @return the inputFilePath
 	 */
-	public static String getInputFilePath() {
+	public String getInputFilePath() {
 		return inputFilePath;
 	}
 
@@ -120,8 +139,41 @@ public class Sudoku {
 	 * @param inputFilePath
 	 *            the inputFilePath to set
 	 */
-	public static void setInputFilePath(String inputFilePath) {
-		Sudoku.inputFilePath = inputFilePath;
+	public void setInputFilePath(String inputFilePath) {
+		this.inputFilePath = inputFilePath;
 	}
 
+	/**
+	 * Getter for emptyCellValue.
+	 * 
+	 * @return the emptyCellValue
+	 */
+	public String getEmptyCellValue() {
+		return emptyCellValue;
+	}
+
+	/**
+	 * Setter for empty cell value.
+	 * 
+	 * @param emptyCellValue
+	 *            the emptyCellValue to set
+	 */
+	public void setEmptyCellValue(String emptyCellValue) {
+		this.emptyCellValue = emptyCellValue;
+	}
+
+	/**
+	 * @return the delimiter
+	 */
+	public String getDelimiter() {
+		return delimiter;
+	}
+
+	/**
+	 * @param delimiter
+	 *            the delimiter to set
+	 */
+	public void setDelimiter(String delimiter) {
+		this.delimiter = delimiter;
+	}
 }

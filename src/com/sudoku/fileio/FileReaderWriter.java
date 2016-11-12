@@ -1,7 +1,6 @@
 package com.sudoku.fileio;
 
-import java.io.File;
-
+import com.sudoku.components.Grid;
 import com.sudoku.exception.FileException;
 import com.sudoku.exception.SudokuFileException;
 
@@ -13,37 +12,26 @@ import com.sudoku.exception.SudokuFileException;
  */
 public interface FileReaderWriter {
 
-	static final String NUMBER_PATTERN = "[1-9]";
-
-	static final String NEW_LINE = "\n";
-
-	static final String PIPE_DELIMITER = "|";
-
-	static final String EXTENSION_TXT = ".txt";
-
-	static final String DEFAULT_OUTPUT_FILENAME = "output.txt";
-
 	/**
-	 * Reads the file and returns the content as a 2D string array.
+	 * Reads the file and returns the content as a {@link Grid} .
 	 * 
 	 * @param file
-	 *            , input file.
-	 * @return 2D character array.
+	 *            the input file path.
+	 * @return {@link Grid}.
 	 * @throws FileException
 	 *             if the file cannot be located on the given location.
 	 */
-	String[][] readFile(File file) throws SudokuFileException;
+	Grid readFileToGrid(String file) throws SudokuFileException;
 
 	/**
-	 * Writes the content of the character array onto a file in the same
-	 * location.
+	 * Writes the grid onto a file in the same location.
 	 * 
-	 * @param charArray
+	 * @param Grid
 	 *            solved grid to write into file.
 	 * @param outputPath
 	 *            the fully qualified output file name.
 	 */
-	void writeFile(String[][] charArray, String outputPath);
+	void writeFileFromGrid(Grid grid, String outputPath);
 
 	/**
 	 * Writes the exception occurred during the execution of the program into
