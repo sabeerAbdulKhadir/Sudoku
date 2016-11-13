@@ -7,6 +7,7 @@ import com.sudoku.components.Grid;
 import com.sudoku.exception.SudokuFileException;
 import com.sudoku.fileio.FileReaderWriter;
 import com.sudoku.fileio.SudokuReaderWriter;
+import com.sudoku.solver.GridPuzzleSolver;
 import com.sudoku.solver.SudokuSolver;
 
 public class Sudoku {
@@ -32,7 +33,7 @@ public class Sudoku {
 	/**
 	 * Solver to solve the puzzle.
 	 */
-	private SudokuSolver solver;
+	private GridPuzzleSolver solver;
 
 	/**
 	 * Initializes the class by reading the input file.
