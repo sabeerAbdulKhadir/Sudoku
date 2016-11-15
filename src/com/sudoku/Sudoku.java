@@ -3,6 +3,8 @@ package com.sudoku;
 
 import java.util.Date;
 
+import org.springframework.web.jsf.DelegatingPhaseListenerMulticaster;
+
 import com.sudoku.components.Grid;
 import com.sudoku.exception.SudokuFileException;
 import com.sudoku.fileio.FileReaderWriter;
@@ -50,10 +52,10 @@ public class Sudoku {
 	 * 
 	 */
 	public Sudoku(String inFilePath, String outFilePath, String delimiter, String emptyCellValue) {
-		outputFilePath = outFilePath;
-		inputFilePath = inFilePath;
-		readerWriter = new SudokuReaderWriter(delimiter, emptyCellValue);
-		solver = new SudokuSolver();
+		setInputFilePath(inFilePath);
+		setOutputFilePath(outFilePath);
+		setDelimiter(delimiter);
+		setEmptyCellValue(emptyCellValue);
 	}
 
 	/**
@@ -62,13 +64,13 @@ public class Sudoku {
 	public void solvePuzzle() {
 		try {
 
-			grid = readerWriter.readFileToGrid(inputFilePath);
-			solver.solveGrid(grid);
-			readerWriter.writeFileFromGrid(grid, getOutputFilePath());
+			grid = getReaderWriter().readFileToGrid(inputFilePath);
+			getSolver().solveGrid(grid);
+			getReaderWriter().writeFileFromGrid(grid, getOutputFilePath());
 
 		} catch (SudokuFileException e) {
 			String errorMessage = getFormattedExceptionMessage(e);
-			readerWriter.writeExceptionFile(errorMessage, getOutputFilePath(), getInputFilePath());
+			getReaderWriter().writeExceptionFile(errorMessage, getOutputFilePath(), getInputFilePath());
 			e.printStackTrace();
 		}
 	}
@@ -164,6 +166,8 @@ public class Sudoku {
 	}
 
 	/**
+	 * Getter for delimiter.
+	 * 
 	 * @return the delimiter
 	 */
 	public String getDelimiter() {
@@ -171,10 +175,58 @@ public class Sudoku {
 	}
 
 	/**
+	 * Setter for delimiter.
+	 * 
 	 * @param delimiter
 	 *            the delimiter to set
 	 */
 	public void setDelimiter(String delimiter) {
 		this.delimiter = delimiter;
+	}
+
+	/**
+	 * Getter for FileReaderWriter. If null, instantiates
+	 * {@linkplain SudokuReaderWriter} with the supplied delimiter and
+	 * emptyCellValue.
+	 * 
+	 * @return the readerWriter
+	 */
+	public FileReaderWriter getReaderWriter() {
+		if (readerWriter == null) {
+			readerWriter = new SudokuReaderWriter(getDelimiter(), getEmptyCellValue());
+		}
+		return readerWriter;
+	}
+
+	/**
+	 * Setter for {@linkplain FileReaderWriter}.
+	 * 
+	 * @param readerWriter
+	 *            the readerWriter to set
+	 */
+	public void setReaderWriter(FileReaderWriter readerWriter) {
+		this.readerWriter = readerWriter;
+	}
+
+	/**
+	 * Getter for {@linkplain GridPuzzleSolver}. If null, instantiates a new
+	 * instance of {@linkplain SudokuSolver}.
+	 * 
+	 * @return the solver
+	 */
+	public GridPuzzleSolver getSolver() {
+		if (solver == null) {
+			solver = new SudokuSolver();
+		}
+		return solver;
+	}
+
+	/**
+	 * Setter for {@linkplain GridPuzzleSolver}.
+	 * @param solver
+	 *            the solver to set
+	 */
+	public void setSolver(GridPuzzleSolver solver) {
+		this.solver = solver;
 	}
 }

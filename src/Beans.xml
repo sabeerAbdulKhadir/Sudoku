@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+	<bean id="sudoku" class="com.sudoku.Sudoku">
+		<constructor-arg index="0" value="input.txt" type="java.lang.String" />
+		<constructor-arg index="1" value="output.txt" type="java.lang.String" />
+		<constructor-arg index="2" value="|" type="java.lang.String" />
+		<constructor-arg index="3" value=" . " type="java.lang.String" />
+
+		<property name="grid" ref="grid" />
+		<property name="readerWriter" ref="readerWriter" />
+		<property name="solver" ref="solver" />
+	</bean>
+
+	<bean id="grid" class="com.sudoku.components.Grid">
+		<constructor-arg index="0" value="9" type="int" />
+		<constructor-arg index="1" value="9" type="int" />
+	</bean>
+
+	<bean id="readerWriter" class="com.sudoku.fileio.SudokuReaderWriter">
+		<constructor-arg index="0" value="|" type="java.lang.String" />
+		<constructor-arg index="1" value=" . " type="java.lang.String" />
+	</bean>
+
+	<bean id="solver" class="com.sudoku.solver.SudokuSolver" />
+	
+</beans>
